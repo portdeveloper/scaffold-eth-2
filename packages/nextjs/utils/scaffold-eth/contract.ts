@@ -210,10 +210,11 @@ export type UseScaffoldEventHistoryConfig<
   TEventName extends ExtractAbiEventNames<ContractAbi<TContractName>>,
 > = {
   contractName: TContractName;
-  eventName: IsContractDeclarationMissing<string, TEventName>;
+  eventName?: IsContractDeclarationMissing<string, TEventName>;
   fromBlock: bigint;
   filters?: EventFilters<TContractName, TEventName>;
   blockData?: boolean;
   transactionData?: boolean;
   receiptData?: boolean;
+  refresh?: boolean;
 };
