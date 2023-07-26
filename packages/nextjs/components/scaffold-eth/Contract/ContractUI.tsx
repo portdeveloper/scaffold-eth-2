@@ -33,7 +33,7 @@ export const ContractUI = ({ contractName, className = "" }: ContractUIProps) =>
   });
 
   const { data: events } = useScaffoldEventHistory({
-    contractName: "YourContract",
+    contractName: contractName,
     fromBlock: 0n,
     blockData: true,
     refresh: refreshDisplayVariables,
