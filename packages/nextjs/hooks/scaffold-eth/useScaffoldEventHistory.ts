@@ -16,6 +16,7 @@ import { ContractAbi, ContractName, UseScaffoldEventHistoryConfig } from "~~/uti
  * @param config.blockData - if set to true it will return the block data for each event (default: false)
  * @param config.transactionData - if set to true it will return the transaction data for each event (default: false)
  * @param config.receiptData - if set to true it will return the receipt data for each event (default: false)
+ * @param config.refresh - if set to true it will refresh the logs based on state change
  */
 export const useScaffoldEventHistory = <
   TContractName extends ContractName,
@@ -28,6 +29,7 @@ export const useScaffoldEventHistory = <
   blockData,
   transactionData,
   receiptData,
+  refresh,
 }: UseScaffoldEventHistoryConfig<TContractName, TEventName>) => {
   const [events, setEvents] = useState<any[]>();
   const [isLoading, setIsLoading] = useState(true);
@@ -98,6 +100,7 @@ export const useScaffoldEventHistory = <
     blockData,
     transactionData,
     receiptData,
+    refresh,
   ]);
 
   return {
