@@ -2,7 +2,7 @@ import { useReducer } from "react";
 import { ContractReadMethods } from "./ContractReadMethods";
 import { ContractVariables } from "./ContractVariables";
 import { ContractWriteMethods } from "./ContractWriteMethods";
-import { Abi, keccak256, toHex } from "viem";
+import { Abi, decodeEventLog, isAddress, keccak256, stringify, toHex } from "viem";
 import { Spinner } from "~~/components/Spinner";
 import { Address, Balance } from "~~/components/scaffold-eth";
 import { useDeployedContractInfo, useNetworkColor, useScaffoldEventHistory } from "~~/hooks/scaffold-eth";
@@ -122,15 +122,40 @@ export const ContractUI = ({ contractName, className = "" }: ContractUIProps) =>
             </div>
           </div>
           <div className="p-5 divide-y divide-base-300 overflow-y-auto">
+            {events?.length === 0 && <p>no events yet</p>}
             {events?.map(event => {
-              const eventHash = event.log.topics[0];
-              const eventName = Object.keys(hashedEventNames).find(key => hashedEventNames[key] === eventHash);
+              try {
+                const decodedEvent = decodeEventLog({
+                  abi: deployedContractAbi,
+                  data: event.log.data,
+                  topics: event.log.topics,
+                });
 
-              return (
-                <div key={event.log.transactionHash} className="flex flex-col gap-2">
-                  {eventName && <span>{eventName} called!</span>}
-                </div>
-              );
+                return (
+                  <div key={event.log.transactionHash} className="flex flex-col gap-2 py-2">
+                    <span className="text-lg font-bold text-blue-500">{decodedEvent.eventName} called!</span>
+                    {Object.entries(decodedEvent.args).map(([key, value], idx) => {
+                      let displayValue;
+                      if (isAddress(value as string)) {
+                        // The value is an address, show it as a clickable link
+                        displayValue = <Address address={value as string} />;
+                      } else {
+                        // Otherwise, just stringify the value
+                        displayValue = stringify(value);
+                      }
+                      return (
+                        <span key={idx} className="flex gap-1">
+                          <span className="font-bold text-neutral">{`${key}:`}</span>
+                          <span className="text-green-500">{displayValue}</span>
+                        </span>
+                      );
+                    })}
+                  </div>
+                );
+              } catch (error) {
+                console.error("Failed to decode event log:", error);
+                return null;
+              }
             })}
           </div>
         </div>
