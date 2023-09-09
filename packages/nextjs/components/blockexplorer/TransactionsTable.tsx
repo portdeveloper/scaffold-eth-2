@@ -1,6 +1,5 @@
 import { formatEther } from "viem";
-import { TransactionHash } from "~~/components/blockexplorer/TransactionHash";
-import { Address } from "~~/components/scaffold-eth";
+import { Address, HashComp } from "~~/components/scaffold-eth";
 import { TransactionWithFunction, getTargetNetwork } from "~~/utils/scaffold-eth";
 import { TransactionsTableProps } from "~~/utils/scaffold-eth/";
 
@@ -23,6 +22,13 @@ export const TransactionsTable = ({ blocks, transactionReceipts }: TransactionsT
             </tr>
           </thead>
           <tbody>
+            {blocks.length === 0 && (
+              <tr>
+                <td colSpan={5} className="text-center">
+                  No transactions found
+                </td>
+              </tr>
+            )}
             {blocks.map(block =>
               (block.transactions as TransactionWithFunction[]).map(tx => {
                 const receipt = transactionReceipts[tx.hash];
@@ -32,7 +38,7 @@ export const TransactionsTable = ({ blocks, transactionReceipts }: TransactionsT
                 return (
                   <tr key={tx.hash} className="hover text-sm">
                     <td className="w-1/12 md:py-4">
-                      <TransactionHash hash={tx.hash} />
+                      <HashComp hash={tx.hash} type="transaction" />
                     </td>
                     <td className="w-2/12 md:py-4">
                       {tx.functionName === "0x" ? "" : <span className="mr-1">{tx.functionName}</span>}
