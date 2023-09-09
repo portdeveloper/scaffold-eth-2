@@ -1,6 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import type { NextPage } from "next";
 import { hardhat } from "wagmi/chains";
+import { BlocksTable } from "~~/components/blockexplorer/BlocksTable";
 import { PaginationButton } from "~~/components/blockexplorer/PaginationButton";
 import { SearchBar } from "~~/components/blockexplorer/SearchBar";
 import { TransactionsTable } from "~~/components/blockexplorer/TransactionsTable";
@@ -8,6 +10,10 @@ import { useFetchBlocks } from "~~/hooks/scaffold-eth";
 import { getTargetNetwork, notification } from "~~/utils/scaffold-eth";
 
 const Blockexplorer: NextPage = () => {
+  const router = useRouter();
+  const initialTab = router.query.tab === "blocks" ? "blocks" : "transactions";
+  const [selectedTab, setSelectedTab] = useState<string>(initialTab);
+
   const { blocks, transactionReceipts, currentPage, totalBlocks, setCurrentPage, error } = useFetchBlocks();
 
   useEffect(() => {
@@ -48,11 +54,41 @@ const Blockexplorer: NextPage = () => {
     }
   }, [error]);
 
+  const changeTab = (tabName: string) => {
+    setSelectedTab(tabName);
+    router.push(`/blockexplorer/${tabName}`);
+  };
+
+  const tabNames: string[] = ["transactions", "blocks"];
+
   return (
     <div className="container mx-auto my-10">
       <SearchBar />
-      <TransactionsTable blocks={blocks} transactionReceipts={transactionReceipts} />
-      <PaginationButton currentPage={currentPage} totalItems={Number(totalBlocks)} setCurrentPage={setCurrentPage} />
+      <div className="my-4">
+        {tabNames.map(tabName => (
+          <button
+            className={`btn btn-secondary btn-sm capitalize font-thin mr-2  ${
+              tabName === selectedTab ? "bg-base-300" : "bg-base-100"
+            }`}
+            key={tabName}
+            onClick={() => changeTab(tabName)}
+          >
+            {tabName}
+          </button>
+        ))}
+      </div>
+
+      {selectedTab === "transactions" && (
+        <>
+          <TransactionsTable blocks={blocks} transactionReceipts={transactionReceipts} />
+          <PaginationButton
+            currentPage={currentPage}
+            totalItems={Number(totalBlocks)}
+            setCurrentPage={setCurrentPage}
+          />
+        </>
+      )}
+      {selectedTab === "blocks" && <BlocksTable blocks={blocks} />}
     </div>
   );
 };
