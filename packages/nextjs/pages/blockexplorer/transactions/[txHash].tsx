@@ -2,14 +2,11 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import type { NextPage } from "next";
 import { Transaction, TransactionReceipt, formatEther, formatUnits } from "viem";
-import { usePublicClient } from "wagmi";
-import { hardhat } from "wagmi/chains";
 import { Address } from "~~/components/scaffold-eth";
+import { extendedClient } from "~~/utils/scaffold-eth";
 import { decodeTransactionData, getFunctionDetails, getTargetNetwork } from "~~/utils/scaffold-eth";
 
-const TransactionPage: NextPage = () => {
-  const client = usePublicClient({ chainId: hardhat.id });
-
+const TransactionsPage: NextPage = () => {
   const router = useRouter();
   const { txHash } = router.query as { txHash?: `0x${string}` };
   const [transaction, setTransaction] = useState<Transaction>();
@@ -21,8 +18,8 @@ const TransactionPage: NextPage = () => {
   useEffect(() => {
     if (txHash) {
       const fetchTransaction = async () => {
-        const tx = await client.getTransaction({ hash: txHash });
-        const receipt = await client.getTransactionReceipt({ hash: txHash });
+        const tx = await extendedClient.getTransaction({ hash: txHash });
+        const receipt = await extendedClient.getTransactionReceipt({ hash: txHash });
 
         const transactionWithDecodedData = decodeTransactionData(tx);
         setTransaction(transactionWithDecodedData);
@@ -34,7 +31,7 @@ const TransactionPage: NextPage = () => {
 
       fetchTransaction();
     }
-  }, [client, txHash]);
+  }, [txHash]);
 
   return (
     <div className="container mx-auto mt-10 mb-20 px-10 md:px-0">
@@ -130,4 +127,4 @@ const TransactionPage: NextPage = () => {
   );
 };
 
-export default TransactionPage;
+export default TransactionsPage;
