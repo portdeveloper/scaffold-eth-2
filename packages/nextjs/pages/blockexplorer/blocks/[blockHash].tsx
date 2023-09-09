@@ -2,14 +2,11 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import type { NextPage } from "next";
 import { Block, Hash, Transaction, formatEther } from "viem";
-import { usePublicClient } from "wagmi";
-import { hardhat } from "wagmi/chains";
 import { Address } from "~~/components/scaffold-eth";
 import { getTargetNetwork } from "~~/utils/scaffold-eth";
+import { extendedClient } from "~~/utils/scaffold-eth";
 
 const BlocksPage: NextPage = () => {
-  const client = usePublicClient({ chainId: hardhat.id });
-
   const router = useRouter();
   const { blockHash } = router.query as { blockHash?: string };
   const [block, setBlock] = useState<Block>();
@@ -20,14 +17,14 @@ const BlocksPage: NextPage = () => {
   useEffect(() => {
     if (blockHash) {
       const fetchBlockData = async () => {
-        const blockData = await client.getBlock({ blockHash: blockHash as Hash, includeTransactions: true });
+        const blockData = await extendedClient.getBlock({ blockHash: blockHash as Hash, includeTransactions: true });
         setBlock(blockData);
         setTransactions(blockData.transactions || []);
       };
 
       fetchBlockData();
     }
-  }, [client, blockHash]);
+  }, [blockHash]);
 
   return (
     <div className="container mx-auto mt-10 mb-20 px-10 md:px-0">
