@@ -5,71 +5,77 @@ import { extendedClient } from "~~/utils/scaffold-eth";
 
 const BLOCKS_PER_PAGE = 20;
 
-export const useFetchBlocks = () => {
+export const useFetchBlocks = (currentTab: "transactions" | "blocks" = "transactions") => {
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [transactionReceipts, setTransactionReceipts] = useState<{
     [key: string]: TransactionReceipt;
   }>({});
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState({
+    transactions: 0,
+    blocks: 0,
+  });
   const [totalBlocks, setTotalBlocks] = useState(0n);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetchBlocks = useCallback(async () => {
-    setError(null);
+  const fetchBlocks = useCallback(
+    async (tab: "transactions" | "blocks") => {
+      setError(null);
 
-    try {
-      const blockNumber = await extendedClient.getBlockNumber();
-      setTotalBlocks(blockNumber);
+      try {
+        const blockNumber = await extendedClient.getBlockNumber();
+        setTotalBlocks(blockNumber);
 
-      const startingBlock = blockNumber - BigInt(currentPage * BLOCKS_PER_PAGE);
-      const blockNumbersToFetch = Array.from(
-        { length: Number(BLOCKS_PER_PAGE < startingBlock + 1n ? BLOCKS_PER_PAGE : startingBlock + 1n) },
-        (_, i) => startingBlock - BigInt(i),
-      );
+        const startingBlock = blockNumber - BigInt(currentPage[tab] * BLOCKS_PER_PAGE);
+        const blockNumbersToFetch = Array.from(
+          { length: Number(BLOCKS_PER_PAGE < startingBlock + 1n ? BLOCKS_PER_PAGE : startingBlock + 1n) },
+          (_, i) => startingBlock - BigInt(i),
+        );
 
-      const blocksWithTransactions = blockNumbersToFetch.map(async blockNumber => {
-        try {
-          return extendedClient.getBlock({ blockNumber, includeTransactions: true });
-        } catch (err) {
-          setError(err instanceof Error ? err : new Error("An error occurred."));
-          throw err;
-        }
-      });
-      const fetchedBlocks = await Promise.all(blocksWithTransactions);
+        const blocksWithTransactions = blockNumbersToFetch.map(async blockNumber => {
+          try {
+            return extendedClient.getBlock({ blockNumber, includeTransactions: true });
+          } catch (err) {
+            setError(err instanceof Error ? err : new Error("An error occurred."));
+            throw err;
+          }
+        });
+        const fetchedBlocks = await Promise.all(blocksWithTransactions);
 
-      fetchedBlocks.forEach(block => {
-        block.transactions.forEach(tx => decodeTransactionData(tx as Transaction));
-      });
+        fetchedBlocks.forEach(block => {
+          block.transactions.forEach(tx => decodeTransactionData(tx as Transaction));
+        });
 
-      const txReceipts = await Promise.all(
-        fetchedBlocks.flatMap(block =>
-          block.transactions.map(async tx => {
-            try {
-              const receipt = await extendedClient.getTransactionReceipt({ hash: (tx as Transaction).hash });
-              return { [(tx as Transaction).hash]: receipt };
-            } catch (err) {
-              setError(err instanceof Error ? err : new Error("An error occurred."));
-              throw err;
-            }
-          }),
-        ),
-      );
+        const txReceipts = await Promise.all(
+          fetchedBlocks.flatMap(block =>
+            block.transactions.map(async tx => {
+              try {
+                const receipt = await extendedClient.getTransactionReceipt({ hash: (tx as Transaction).hash });
+                return { [(tx as Transaction).hash]: receipt };
+              } catch (err) {
+                setError(err instanceof Error ? err : new Error("An error occurred."));
+                throw err;
+              }
+            }),
+          ),
+        );
 
-      setBlocks(fetchedBlocks);
-      setTransactionReceipts(prevReceipts => ({ ...prevReceipts, ...Object.assign({}, ...txReceipts) }));
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error("An error occurred."));
-    }
-  }, [currentPage]);
+        setBlocks(fetchedBlocks);
+        setTransactionReceipts(prevReceipts => ({ ...prevReceipts, ...Object.assign({}, ...txReceipts) }));
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error("An error occurred."));
+      }
+    },
+    [currentPage],
+  );
 
   useEffect(() => {
-    fetchBlocks();
-  }, [fetchBlocks]);
+    fetchBlocks(currentTab);
+  }, [fetchBlocks, currentTab]);
 
   useEffect(() => {
     const handleNewBlock = async (newBlock: any) => {
       try {
-        if (currentPage === 0) {
+        if (currentPage[currentTab] === 0) {
           if (newBlock.transactions.length > 0) {
             const transactionsDetails = await Promise.all(
               newBlock.transactions.map((txHash: string) => extendedClient.getTransaction({ hash: txHash as Hash })),
@@ -103,7 +109,7 @@ export const useFetchBlocks = () => {
     };
 
     return extendedClient.watchBlocks({ onBlock: handleNewBlock, includeTransactions: true });
-  }, [blocks, currentPage]);
+  }, [blocks, currentPage, currentTab]);
 
   return {
     blocks,

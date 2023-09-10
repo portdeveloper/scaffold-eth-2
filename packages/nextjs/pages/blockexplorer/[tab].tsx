@@ -12,9 +12,9 @@ import { getTargetNetwork, notification } from "~~/utils/scaffold-eth";
 const Blockexplorer: NextPage = () => {
   const router = useRouter();
   const initialTab = router.query.tab === "blocks" ? "blocks" : "transactions";
-  const [selectedTab, setSelectedTab] = useState<string>(initialTab);
+  const [selectedTab, setSelectedTab] = useState<"blocks" | "transactions">(initialTab);
 
-  const { blocks, transactionReceipts, currentPage, totalBlocks, setCurrentPage, error } = useFetchBlocks();
+  const { blocks, transactionReceipts, currentPage, totalBlocks, setCurrentPage, error } = useFetchBlocks(selectedTab);
 
   useEffect(() => {
     if (getTargetNetwork().id === hardhat.id && error) {
@@ -54,12 +54,12 @@ const Blockexplorer: NextPage = () => {
     }
   }, [error]);
 
-  const changeTab = (tabName: string) => {
+  const changeTab = (tabName: "blocks" | "transactions") => {
     setSelectedTab(tabName);
     router.push(`/blockexplorer/${tabName}`);
   };
 
-  const tabNames: string[] = ["transactions", "blocks"];
+  const tabNames: ("transactions" | "blocks")[] = ["transactions", "blocks"];
 
   return (
     <div className="container mx-auto my-10">
@@ -82,13 +82,22 @@ const Blockexplorer: NextPage = () => {
         <>
           <TransactionsTable blocks={blocks} transactionReceipts={transactionReceipts} />
           <PaginationButton
-            currentPage={currentPage}
+            currentPage={currentPage[selectedTab]}
             totalItems={Number(totalBlocks)}
-            setCurrentPage={setCurrentPage}
+            setCurrentPage={page => setCurrentPage(prev => ({ ...prev, [selectedTab]: page }))}
           />
         </>
       )}
-      {selectedTab === "blocks" && <BlocksTable blocks={blocks} />}
+      {selectedTab === "blocks" && (
+        <>
+          <BlocksTable blocks={blocks} />
+          <PaginationButton
+            currentPage={currentPage[selectedTab]}
+            totalItems={Number(totalBlocks)}
+            setCurrentPage={page => setCurrentPage(prev => ({ ...prev, [selectedTab]: page }))}
+          />
+        </>
+      )}
     </div>
   );
 };
