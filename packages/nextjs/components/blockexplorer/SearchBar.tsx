@@ -1,22 +1,19 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
 import { isAddress, isHex } from "viem";
-import { usePublicClient } from "wagmi";
-import { hardhat } from "wagmi/chains";
+import { extendedClient } from "~~/utils/scaffold-eth";
 
 export const SearchBar = () => {
   const [searchInput, setSearchInput] = useState("");
   const router = useRouter();
 
-  const client = usePublicClient({ chainId: hardhat.id });
-
   const handleSearch = async (event: React.FormEvent) => {
     event.preventDefault();
     if (isHex(searchInput)) {
       try {
-        const tx = await client.getTransaction({ hash: searchInput });
+        const tx = await extendedClient.getTransaction({ hash: searchInput });
         if (tx) {
-          router.push(`/blockexplorer/transaction/${searchInput}`);
+          router.push(`/blockexplorer/transactions/${searchInput}`);
           return;
         }
       } catch (error) {
