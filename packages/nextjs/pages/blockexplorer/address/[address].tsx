@@ -34,7 +34,7 @@ const publicClient = createPublicClient({
 
 const AddressPage = ({ address, contractData }: PageProps) => {
   const router = useRouter();
-  const { blocks, transactionReceipts, currentPage, totalBlocks, setCurrentPage } = useFetchBlocks();
+  const { blocks, transactionReceipts, currentPage, totalBlocks, setCurrentPage } = useFetchBlocks("transactions");
   const [activeTab, setActiveTab] = useState("transactions");
   const [isContract, setIsContract] = useState(false);
 
@@ -110,9 +110,9 @@ const AddressPage = ({ address, contractData }: PageProps) => {
         <div className="pt-4">
           <TransactionsTable blocks={filteredBlocks} transactionReceipts={transactionReceipts} />
           <PaginationButton
-            currentPage={currentPage}
+            currentPage={currentPage[activeTab]}
             totalItems={Number(totalBlocks)}
-            setCurrentPage={setCurrentPage}
+            setCurrentPage={page => setCurrentPage(prev => ({ ...prev, [activeTab]: page }))}
           />
         </div>
       )}
