@@ -19,7 +19,7 @@ export const BlocksTable = ({ blocks }: { blocks: Block[] }) => {
           <tbody>
             {blocks.length === 0 && (
               <tr>
-                <td colSpan={5} className="text-center">
+                <td colSpan={6} className="text-center">
                   No blocks found
                 </td>
               </tr>

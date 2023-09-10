@@ -24,7 +24,7 @@ export const TransactionsTable = ({ blocks, transactionReceipts }: TransactionsT
           <tbody>
             {!Object.values(transactionReceipts).length && (
               <tr>
-                <td colSpan={5} className="text-center">
+                <td colSpan={7} className="text-center">
                   No transactions found
                 </td>
               </tr>
