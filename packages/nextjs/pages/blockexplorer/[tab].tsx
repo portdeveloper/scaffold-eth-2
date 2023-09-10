@@ -2,10 +2,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import type { NextPage } from "next";
 import { hardhat } from "wagmi/chains";
-import { BlocksTable } from "~~/components/blockexplorer/BlocksTable";
-import { PaginationButton } from "~~/components/blockexplorer/PaginationButton";
-import { SearchBar } from "~~/components/blockexplorer/SearchBar";
-import { TransactionsTable } from "~~/components/blockexplorer/TransactionsTable";
+import { BlocksTable, PaginationButton, SearchBar, Toolbar, TransactionsTable } from "~~/components/blockexplorer/";
 import { useFetchBlocks } from "~~/hooks/scaffold-eth";
 import { getTargetNetwork, notification } from "~~/utils/scaffold-eth";
 
@@ -77,6 +74,7 @@ const Blockexplorer: NextPage = () => {
           </button>
         ))}
       </div>
+      <Toolbar selectedTab={selectedTab} />
 
       {selectedTab === "transactions" && (
         <>

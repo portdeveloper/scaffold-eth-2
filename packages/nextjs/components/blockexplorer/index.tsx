@@ -4,3 +4,5 @@ export * from "./AddressStorageTab";
 export * from "./PaginationButton";
 export * from "./SearchBar";
 export * from "./TransactionsTable";
+export * from "./BlocksTable";
+export * from "./Toolbar";
