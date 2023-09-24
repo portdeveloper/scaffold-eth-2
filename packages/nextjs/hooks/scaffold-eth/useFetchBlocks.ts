@@ -12,6 +12,9 @@ import {
 import { hardhat } from "wagmi/chains";
 import { decodeTransactionData } from "~~/utils/scaffold-eth";
 
+// @todo block exp only sees the txs in the last 20 blocks!!!
+// so if there are 21 blocks and the first tx is in block 1, it won't show up
+
 const BLOCKS_PER_PAGE = 20;
 
 export const testClient = createTestClient({
