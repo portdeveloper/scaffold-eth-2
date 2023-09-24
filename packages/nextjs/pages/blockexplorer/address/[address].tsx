@@ -32,6 +32,8 @@ const publicClient = createPublicClient({
   transport: http(),
 });
 
+// @todo transaction table is rendered twice
+
 const AddressPage = ({ address, contractData }: PageProps) => {
   const router = useRouter();
   const { blocks, transactionReceipts, currentPage, totalBlocks, setCurrentPage } = useFetchBlocks("transactions");
@@ -108,7 +110,6 @@ const AddressPage = ({ address, contractData }: PageProps) => {
       )}
       {activeTab === "transactions" && (
         <div className="pt-4">
-          <TransactionsTable blocks={filteredBlocks} transactionReceipts={transactionReceipts} />
           <TransactionsTable blocks={filteredBlocks} transactionReceipts={transactionReceipts} />
           <PaginationButton
             currentPage={currentPage[activeTab]}
