@@ -109,6 +109,7 @@ const AddressPage = ({ address, contractData }: PageProps) => {
       {activeTab === "transactions" && (
         <div className="pt-4">
           <TransactionsTable blocks={filteredBlocks} transactionReceipts={transactionReceipts} />
+          <TransactionsTable blocks={filteredBlocks} transactionReceipts={transactionReceipts} />
           <PaginationButton
             currentPage={currentPage[activeTab]}
             totalItems={Number(totalBlocks)}
